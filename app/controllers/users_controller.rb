@@ -1,5 +1,8 @@
 class UsersController < ApplicationController
-  before_action :find_user, only: [:show]
+  before_action :logged_in_user, except: [:show, :create, :new]
+  before_action :verify_admin, only: :destroy	
+  before_action :find_user, except: [:create, :new, :index]
+  before_action :correct_user, only: [:edit, :update]
 
   def new
     @user = User.new
@@ -16,8 +19,29 @@ class UsersController < ApplicationController
     end
   end
 
-  private
+  def update
+    if @user.update_attributes user_params
+      flash[:success] = "Profile updated"
+      redirect_to @user
+    else
+      render :edit
+    end
+  end
 
+  def edit
+  end
+
+  def index
+    @users = User.paginate page: params[:page]
+  end
+
+  def destroy
+    @user.destroy
+    flash[:success] = "User deleted"
+    redirect_to users_url
+  end
+
+  private
   def find_user
     @user= User.find_by_id params[:id]
     unless @user
@@ -29,5 +53,9 @@ class UsersController < ApplicationController
   def user_params
     params.require(:user).permit :name, :email, :password, 
       :password_confirmation 
+  end
+
+  def correct_user
+    redirect_to root_url unless @user == current_user
   end
 end
