@@ -42,7 +42,7 @@ class UsersController < ApplicationController
   end
 
   def show
-    redirect_to root_url
+    @microposts = @user.microposts.paginate page: params[:page]
   end
 
   private
