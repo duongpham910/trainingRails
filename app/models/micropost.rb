@@ -6,6 +6,9 @@ class Micropost < ApplicationRecord
   mount_uploader :picture, PictureUploader
   validate :picture_size
 
+  scope :feeds, -> (user_id, following_ids) {where(
+    "user_id = ? OR user_id IN (?)", user_id, following_ids)}
+
   private
   def picture_size
     if picture.size > 5.megabytes
